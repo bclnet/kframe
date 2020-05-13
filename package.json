@@ -1,0 +1,45 @@
+{
+  "name": "kframe",
+  "version": "0.1.0",
+  "description": "kframe",
+  "main": "lib/index.js",
+  "keywords": [
+    "kframe",
+    "cache"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bclnet/kframe.git"
+  },
+  "scripts": {
+    "test": "npm-run-all test:jest",
+    "test:jest": "jest",
+    "prepublish": "npm run build",
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint --ext .js src/**",
+    "lint:test": "eslint --ext .js test/**",
+    "build": "babel -d lib/ src/"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "Sky Morey <smorey@degdigital.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "eslint": "^7.0.0",
+    "eslint-plugin-import": "^2.20.2",
+    "jest": "^26.0.1",
+    "npm-run-all": "^4.1.5",
+    "power-assert": "^1.6.1"
+  },
+  "jest": {
+    "testRegex": "(/test/.*|\\.(test|spec))\\.js$",
+    "collectCoverage": true
+  }
+}

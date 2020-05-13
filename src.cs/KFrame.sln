@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrame", "KFrame\KFrame.csproj", "{EDB8B76D-EA00-4F1C-A993-DFD28920DC23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrameHost", "KFrameHost\KFrameHost.csproj", "{BBB9492E-3746-4DD2-8A77-0B9495B5F9AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrame.Tests", "KFrame.Tests\KFrame.Tests.csproj", "{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDB8B76D-EA00-4F1C-A993-DFD28920DC23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDB8B76D-EA00-4F1C-A993-DFD28920DC23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDB8B76D-EA00-4F1C-A993-DFD28920DC23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDB8B76D-EA00-4F1C-A993-DFD28920DC23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBB9492E-3746-4DD2-8A77-0B9495B5F9AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBB9492E-3746-4DD2-8A77-0B9495B5F9AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBB9492E-3746-4DD2-8A77-0B9495B5F9AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBB9492E-3746-4DD2-8A77-0B9495B5F9AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {916C8256-2847-496B-B262-971ECAA77D67}
+	EndGlobalSection
+EndGlobal
