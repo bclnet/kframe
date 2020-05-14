@@ -3,8 +3,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace KFrame
@@ -43,59 +44,73 @@ namespace KFrame
       var req = context.Request; var res = context.Response;
       if (req.Path.StartsWithSegments(_options.RequestPath, StringComparison.OrdinalIgnoreCase, out var remaining))
       {
-        if (remaining.StartsWithSegments("/i", StringComparison.OrdinalIgnoreCase, out var remaining2)) await IFrameAsync(req, res, remaining2);
-        else if (remaining.StartsWithSegments("/p", StringComparison.OrdinalIgnoreCase, out remaining2)) await PFrameAsync(req, res, remaining2);
-        else if (remaining.StartsWithSegments("/clear", StringComparison.OrdinalIgnoreCase, out remaining2)) await ClearAsync(req, res, remaining2);
-        else if (remaining.StartsWithSegments("/install", StringComparison.OrdinalIgnoreCase, out remaining2)) await InstallAsync(req, res, remaining2);
-        else if (remaining.StartsWithSegments("/uninstall", StringComparison.OrdinalIgnoreCase, out remaining2)) await UninstallAsync(req, res, remaining2);
-        else if (remaining.StartsWithSegments("/reinstall", StringComparison.OrdinalIgnoreCase, out remaining2)) await ReinstallAsync(req, res, remaining2);
+        KFrameTrace trace = null;
+        if (remaining.StartsWithSegments("/i", StringComparison.OrdinalIgnoreCase, out var remaining2)) trace = await IFrameAsync(req, res, remaining2);
+        else if (remaining.StartsWithSegments("/p", StringComparison.OrdinalIgnoreCase, out remaining2)) trace = await PFrameAsync(req, res, remaining2);
+        else if (remaining.StartsWithSegments("/clear", StringComparison.OrdinalIgnoreCase, out remaining2)) trace = await ClearAsync(req, res, remaining2);
+        else if (remaining.StartsWithSegments("/install", StringComparison.OrdinalIgnoreCase, out remaining2)) trace = await InstallAsync(req, res, remaining2);
+        else if (remaining.StartsWithSegments("/uninstall", StringComparison.OrdinalIgnoreCase, out remaining2)) trace = await UninstallAsync(req, res, remaining2);
+        else if (remaining.StartsWithSegments("/reinstall", StringComparison.OrdinalIgnoreCase, out remaining2)) trace = await ReinstallAsync(req, res, remaining2);
         else await _next(context);
+        if (_options.Log != null)
+          trace?.Log(_options.Log);
         return;
       }
       await _next(context);
     }
 
-    async Task IFrameAsync(HttpRequest req, HttpResponse res, string remaining)
+
+
+    async Task<KFrameTrace> IFrameAsync(HttpRequest req, HttpResponse res, string remaining)
     {
+      var trace = new KFrameTrace(KFrameTrace.Type.IFrame);
       res.Clear();
       var etag = req.Headers["If-None-Match"];
       if (!string.IsNullOrEmpty(etag) && etag == "\"iframe\"")
       {
-        res.StatusCode = (int)HttpStatusCode.NotModified;
-        return;
+        res.StatusCode = trace.StatusCode = (int)HttpStatusCode.NotModified;
+        trace.FromETag = etag.ToString();
+        return trace;
       }
-      var result = await _repository.GetIFrameAsync();
+      var result = (List<object>)(await _repository.GetIFrameAsync(trace));
+      trace.IFrames = result.Select(x => (long)((dynamic)x).frame).ToArray();
       res.StatusCode = (int)HttpStatusCode.OK;
       res.Headers.Add("Access-Control-Allow-Origin", "*");
       res.ContentType = "application/json";
       var typedHeaders = res.GetTypedHeaders();
-      typedHeaders.CacheControl = new CacheControlHeaderValue { Public = true, MaxAge = KFrameTiming.IFrameCacheMaxAge() };
-      typedHeaders.Expires = KFrameTiming.IFrameCacheExpires();
+      typedHeaders.CacheControl = new CacheControlHeaderValue { Public = true, MaxAge = trace.MaxAge = KFrameTiming.IFrameCacheMaxAge() };
+      typedHeaders.Expires = trace.Expires = KFrameTiming.IFrameCacheExpires();
       typedHeaders.ETag = new EntityTagHeaderValue("\"iframe\"");
+      trace.ETag = "\"iframe\"";
       var json = JsonConvert.SerializeObject((object)result);
       await res.WriteAsync(json);
+      trace.ContentLength = res.ContentLength ?? json.Length;
+      return trace;
     }
 
-    async Task PFrameAsync(HttpRequest req, HttpResponse res, string remaining)
+    async Task<KFrameTrace> PFrameAsync(HttpRequest req, HttpResponse res, string remaining)
     {
+      var trace = new KFrameTrace(KFrameTrace.Type.PFrame);
       res.Clear();
       if (string.IsNullOrEmpty(remaining) || remaining[0] != '/')
       {
-        res.StatusCode = (int)HttpStatusCode.NotFound;
-        return;
+        res.StatusCode = trace.StatusCode = (int)HttpStatusCode.NotFound;
+        return trace;
       }
       if (!long.TryParse(remaining.Substring(1), out var iframe))
       {
-        res.StatusCode = (int)HttpStatusCode.NotFound;
-        return;
+        res.StatusCode = trace.StatusCode = (int)HttpStatusCode.NotFound;
+        return trace;
       }
+      trace.IFrames = new[] { iframe };
       var etag = req.Headers["If-None-Match"];
       if (!string.IsNullOrEmpty(etag) && _repository.HasPFrame(etag))
       {
-        res.StatusCode = (int)HttpStatusCode.NotModified;
-        return;
+        res.StatusCode = trace.StatusCode = (int)HttpStatusCode.NotModified;
+        trace.FromETag = etag.ToString();
+        return trace;
       }
-      var result = await _repository.GetPFrameAsync(iframe);
+      var result = await _repository.GetPFrameAsync(iframe, trace);
       res.StatusCode = (int)HttpStatusCode.OK;
       res.ContentType = "application/json";
       res.Headers.Add("Access-Control-Allow-Origin", "*");
@@ -103,16 +118,39 @@ namespace KFrame
       typedHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
       //typedHeaders.Expires = DateTime.Today.ToUniversalTime().AddDays(1);
       typedHeaders.ETag = new EntityTagHeaderValue(result.ETag);
+      trace.ETag = result.ETag;
       var json = JsonConvert.SerializeObject(result.Result);
       await res.WriteAsync(json);
+      trace.ContentLength = res.ContentLength ?? json.Length;
+      return trace;
     }
 
-    async Task ClearAsync(HttpRequest req, HttpResponse res, string remaining) => await res.WriteAsync(await _repository.ClearAsync(remaining));
+    async Task<KFrameTrace> ClearAsync(HttpRequest req, HttpResponse res, string remaining)
+    {
+      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      await res.WriteAsync(await _repository.ClearAsync(remaining, trace));
+      return trace;
+    }
 
-    async Task InstallAsync(HttpRequest req, HttpResponse res, string remaining) => await res.WriteAsync(await _repository.InstallAsync(remaining));
+    async Task<KFrameTrace> InstallAsync(HttpRequest req, HttpResponse res, string remaining)
+    {
+      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      await res.WriteAsync(await _repository.InstallAsync(remaining, trace));
+      return trace;
+    }
 
-    async Task UninstallAsync(HttpRequest req, HttpResponse res, string remaining) => await res.WriteAsync(await _repository.UninstallAsync(remaining));
+    async Task<KFrameTrace> UninstallAsync(HttpRequest req, HttpResponse res, string remaining)
+    {
+      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      await res.WriteAsync(await _repository.UninstallAsync(remaining, trace));
+      return trace;
+    }
 
-    async Task ReinstallAsync(HttpRequest req, HttpResponse res, string remaining) => await res.WriteAsync(await _repository.ReinstallAsync(remaining));
+    async Task<KFrameTrace> ReinstallAsync(HttpRequest req, HttpResponse res, string remaining)
+    {
+      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      await res.WriteAsync(await _repository.ReinstallAsync(remaining, trace));
+      return trace;
+    }
   }
 }

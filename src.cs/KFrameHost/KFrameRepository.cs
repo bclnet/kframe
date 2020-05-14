@@ -18,37 +18,43 @@ namespace KFrame
     /// Installs the asynchronous.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    Task<string> ClearAsync(string accessCode);
+    Task<string> ClearAsync(string accessCode, KFrameTrace trace);
     /// <summary>
     /// Installs the asynchronous.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    Task<string> InstallAsync(string accessCode);
+    Task<string> InstallAsync(string accessCode, KFrameTrace trace);
     /// <summary>
     /// Uninstalls the asynchronous.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    Task<string> UninstallAsync(string accessCode);
+    Task<string> UninstallAsync(string accessCode, KFrameTrace trace);
     /// <summary>
     /// Reinstalls the asynchronous.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    Task<string> ReinstallAsync(string accessCode);
+    Task<string> ReinstallAsync(string accessCode, KFrameTrace trace);
     /// <summary>
     /// Gets the i frame asynchronous.
     /// </summary>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.Object&gt;.</returns>
-    Task<object> GetIFrameAsync();
+    Task<object> GetIFrameAsync(KFrameTrace trace);
     /// <summary>
     /// Gets the p frame asynchronous.
     /// </summary>
     /// <param name="iframe">The iframe.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;MemoryCacheResult&gt;.</returns>
-    Task<MemoryCacheResult> GetPFrameAsync(long iframe);
+    Task<MemoryCacheResult> GetPFrameAsync(long iframe, KFrameTrace trace);
     /// <summary>
     /// Determines whether [has i frame] [the specified etag].
     /// </summary>
@@ -107,7 +113,8 @@ namespace KFrame
       AbsoluteExpiration = KFrameTiming.IFrameAbsoluteExpiration(),
     }, async (tag, values) =>
     {
-      var parent = (KFrameRepository)tag;
+      var (parent, trace) = ((KFrameRepository, KFrameTrace))tag;
+      trace.Rebuild = true;
       var results = new List<object>();
       foreach (var node in parent.Nodes)
         results.Add(await node.Source.GetIFrameAsync(node.Chapter, node.FrameSources));
@@ -119,7 +126,8 @@ namespace KFrame
       AbsoluteExpiration = KFrameTiming.PFrameAbsoluteExpiration(),
     }), async (tag, values) =>
     {
-      var parent = (KFrameRepository)tag;
+      var (parent, trace) = ((KFrameRepository, KFrameTrace))tag;
+      trace.Rebuild = true;
       var iframe = new DateTime((long)values[0]);
       var results = new List<object>();
       var checks = new Queue<Check>();
@@ -157,7 +165,7 @@ namespace KFrame
     {
       options.RegisterPostEvictionCallback(async (key, value, reason, state) =>
       {
-        var parent = (KFrameRepository)state;
+        var (parent, trace) = ((KFrameRepository, KFrameTrace))state;
         var result = value as MemoryCacheResult;
         if (parent == null || result == null || result.Tag == null)
           return;
@@ -242,11 +250,12 @@ namespace KFrame
     /// <value>The options.</value>
     public KFrameOptions Options { get; set; }
 
-    bool ValidAccessCode(string accessCode, out string message)
+    bool ValidAccessCode(string accessCode, KFrameTrace trace, out string message)
     {
       if (!string.IsNullOrEmpty(Options.AccessToken) && $"/{Options.AccessToken}" != accessCode)
       {
         message = "Invalid Access Token";
+        trace.AccessDenied = true;
         return false;
       }
       message = null;
@@ -257,14 +266,15 @@ namespace KFrame
     /// clear as an asynchronous operation.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    public async Task<string> ClearAsync(string accessCode)
+    public async Task<string> ClearAsync(string accessCode, KFrameTrace trace)
     {
-      if (!ValidAccessCode(accessCode, out var message))
+      if (!ValidAccessCode(accessCode, trace, out var message))
         return message;
       var b = new StringBuilder();
-      //foreach (var node in Nodes)
-      //    b.Append(await node.Source.ClearAsync(node.Chapter, node.FrameSources));
+      foreach (var node in Nodes)
+        b.Append(await node.Source.ClearAsync(node.Chapter, node.FrameSources));
       _cache.Touch("KFrame");
       return b.ToString();
     }
@@ -273,12 +283,13 @@ namespace KFrame
     /// install as an asynchronous operation.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
     /// <exception cref="System.InvalidOperationException"></exception>
     /// <exception cref="System.InvalidOperationException"></exception>
-    public async Task<string> InstallAsync(string accessCode)
+    public async Task<string> InstallAsync(string accessCode, KFrameTrace trace)
     {
-      if (!ValidAccessCode(accessCode, out var message))
+      if (!ValidAccessCode(accessCode, trace, out var message))
         return message;
       var b = new StringBuilder();
       foreach (var node in Nodes)
@@ -293,9 +304,9 @@ namespace KFrame
     /// <returns>Task&lt;System.String&gt;.</returns>
     /// <exception cref="System.InvalidOperationException"></exception>
     /// <exception cref="System.InvalidOperationException"></exception>
-    public async Task<string> UninstallAsync(string accessCode)
+    public async Task<string> UninstallAsync(string accessCode, KFrameTrace trace)
     {
-      if (!ValidAccessCode(accessCode, out var message))
+      if (!ValidAccessCode(accessCode, trace, out var message))
         return message;
       var b = new StringBuilder();
       foreach (var node in Nodes)
@@ -307,29 +318,32 @@ namespace KFrame
     /// reinstall as an asynchronous operation.
     /// </summary>
     /// <param name="accessCode">The access code.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;System.String&gt;.</returns>
-    public async Task<string> ReinstallAsync(string accessCode)
+    public async Task<string> ReinstallAsync(string accessCode, KFrameTrace trace)
     {
-      if (!ValidAccessCode(accessCode, out var message))
+      if (!ValidAccessCode(accessCode, trace, out var message))
         return message;
       var b = new StringBuilder();
-      b.Append(await UninstallAsync(accessCode));
-      b.Append(await InstallAsync(accessCode));
+      b.Append(await UninstallAsync(accessCode, trace));
+      b.Append(await InstallAsync(accessCode, trace));
       return b.ToString();
     }
 
     /// <summary>
     /// get i frame as an asynchronous operation.
     /// </summary>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;dynamic&gt;.</returns>
-    public async Task<dynamic> GetIFrameAsync() => await _cache.GetAsync<dynamic>(IFrame, this);
+    public async Task<dynamic> GetIFrameAsync(KFrameTrace trace) => await _cache.GetAsync<dynamic>(IFrame, (this, trace));
 
     /// <summary>
     /// get p frame as an asynchronous operation.
     /// </summary>
-    /// <param name="iframe">The kframe.</param>
+    /// <param name="iframe">The iframe.</param>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;MemoryCacheResult&gt;.</returns>
-    public async Task<MemoryCacheResult> GetPFrameAsync(long iframe) => await _cache.GetResultAsync(PFrame, this, iframe);
+    public async Task<MemoryCacheResult> GetPFrameAsync(long iframe, KFrameTrace trace) => await _cache.GetResultAsync(PFrame, (this, trace), iframe);
 
     /// <summary>
     /// Determines whether [has p frame] [the specified etag].
@@ -341,8 +355,9 @@ namespace KFrame
     /// <summary>
     /// get merged frame as an asynchronous operation.
     /// </summary>
+    /// <param name="trace">The trace.</param>
     /// <returns>Task&lt;dynamic&gt;.</returns>
-    public async Task<dynamic> GetMergedFrameAsync() => await _cache.GetAsync<dynamic>(MergedFrame, this);
+    public async Task<dynamic> GetMergedFrameAsync(KFrameTrace trace) => await _cache.GetAsync<dynamic>(MergedFrame, (this, trace));
 
     /// <summary>
     /// Finds the sources from assembly.

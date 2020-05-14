@@ -1,4 +1,5 @@
 using KFrame.Sources;
+using Microsoft.Extensions.Logging;
 
 namespace KFrame
 {
@@ -12,6 +13,11 @@ namespace KFrame
     /// </summary>
     /// <value>The request path.</value>
     public string RequestPath { get; set; } = "/@frame";
+    /// <summary>
+    /// Gets or sets the logger.
+    /// </summary>
+    /// <value>The logger.</value>
+    public ILogger Log { get; set; }
     /// <summary>
     /// Gets or sets the access token.
     /// </summary>

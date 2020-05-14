@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
 
@@ -41,6 +42,44 @@ namespace KFrame
       return app.UseMiddleware<KFrameMiddleware>(new KFrameOptions
       {
         RequestPath = new PathString(requestPath)
+      }, sources);
+    }
+
+    /// <summary>Uses the k frame.</summary>
+    /// <param name="app">The application.</param>
+    /// <param name="log">The logger.</param>
+    /// <param name="assemblies">The assemblies.</param>
+    /// <returns>IApplicationBuilder.</returns>
+    /// <exception cref="System.ArgumentNullException">app</exception>
+    public static IApplicationBuilder UseKFrame(this IApplicationBuilder app, ILogger log, params Assembly[] assemblies)
+    {
+      if (app == null)
+        throw new ArgumentNullException(nameof(app));
+      var sources = KFrameRepository.FindSourcesFromAssembly(assemblies);
+      return app.UseMiddleware<KFrameMiddleware>(new KFrameOptions
+      {
+        Log = log,
+      }, sources);
+    }
+
+    /// <summary>
+    /// Uses the k frame.
+    /// </summary>
+    /// <param name="app">The application.</param>
+    /// <param name="requestPath">The request path.</param>
+    /// <param name="log">The logger.</param>
+    /// <param name="assemblies">The assemblies.</param>
+    /// <returns>IApplicationBuilder.</returns>
+    /// <exception cref="System.ArgumentNullException">app</exception>
+    public static IApplicationBuilder UseKFrame(this IApplicationBuilder app, string requestPath, ILogger log, params Assembly[] assemblies)
+    {
+      if (app == null)
+        throw new ArgumentNullException(nameof(app));
+      var sources = KFrameRepository.FindSourcesFromAssembly(assemblies);
+      return app.UseMiddleware<KFrameMiddleware>(new KFrameOptions
+      {
+        RequestPath = new PathString(requestPath),
+        Log = log,
       }, sources);
     }
 
