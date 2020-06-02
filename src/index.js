@@ -2,30 +2,31 @@
 /* eslint-disable no-undef */
 import _ from 'lodash';
 
-export const config = () => {
+export const config = () => document.configs.kframe || (() => {
   const configs = document.configs = document.configs || {};
-  return configs.kframe = Object.assign(configs.kframe || {}, { kframeUrl: '/@frame' });
-}
+  return configs.kframe = Object.assign(configs.kframe || {}, { kframeUrl: configs.kframeUrl || '/@frame' });
+})();
+
 export const isLoaded = () => !!document.frame;
 export const frame = () => document.frame || null;
 export const clearFrame = () => { document.frame = null; };
 
 let lookupFrame = () => new Promise((resolve, reject) => {
   let data = {};
-  const { kframeUrl } = getConfig();
+  const { kframeUrl } = config();
   fetch(`${kframeUrl}/i`).then((res) => res.json(), reject).then((i) => {
-    fetch(`${kframeUrl}/p/${i.frame}`).then((res) => res.json(), reject).then((p) => {
-      if (i) {
-        _.forOwn(i, (v, k) => {
+    if (!i || !i.length || !i[0].frame) reject();
+    else fetch(`${kframeUrl}/p/${i[0].frame}`).then((res) => res.json(), reject).then((p) => {
+      i.forEach((ix, idx) => {
+        const px = p[idx];
+        _.forOwn(ix, (v, k) => {
           if (k !== 'frame') {
-            _.pullAllWith(i[k], y.del, (x, y) => y.t === k && x.id === y.id);
-            data[k] = _.unionBy(y[k], x[k], 'id');
+            _.pullAllWith(ix[k], px.del, (x, y) => y.t === k && x.id === y.id);
+            data[k] = _.unionBy(px[k], ix[k], 'id');
           }
         });
-        return resolve(data);
-      }
-      console.log('error resolving cache');
-      return resolve(null);
+      });
+      return resolve(data);
     }, reject);
   }, reject)
 });

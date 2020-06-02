@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +25,10 @@ namespace KFrame
     static async Task<T> LookupFrame(CancellationToken? cancellationToken = null)
     {
       var kframeUrl = Config.kframeUrl;
-      var i = await _http.Execute<WebApiResponse>(new HttpRequestMessage(HttpMethod.Get, $"{kframeUrl}/i"), cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-      var p = await _http.Execute<WebApiResponse>(new HttpRequestMessage(HttpMethod.Get, $"{kframeUrl}/p/{i.frame}"), cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+      var i = await _http.Execute<KFrameResponse[]>(new HttpRequestMessage(HttpMethod.Get, $"{kframeUrl}/i"), cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+      if (i == null || i.Length == 0)
+        throw new InvalidOperationException("Empty response");
+      var p = await _http.Execute<KFrameResponse[]>(new HttpRequestMessage(HttpMethod.Get, $"{kframeUrl}/p/{i.First().frame}"), cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
       return default;
     }
 
@@ -37,6 +41,11 @@ namespace KFrame
           return Frame;
         _lock.EnterWriteLock();
         try { return (Frame = await LookupFrame()); }
+        catch (Exception e)
+        {
+          Console.WriteLine(e);
+          throw;
+        }
         finally { _lock.ExitWriteLock(); }
       }
       finally { _lock.ExitUpgradeableReadLock(); }

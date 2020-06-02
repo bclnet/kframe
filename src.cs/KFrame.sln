@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrameHost", "KFrameHost\KF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrame.Tests", "KFrame.Tests\KFrame.Tests.csproj", "{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contoso.Extensions.Caching.FileStream", "..\..\Contoso.Extensions\Contoso.Extensions.Caching.FileSystem\Contoso.Extensions.Caching.FileStream.csproj", "{B7E3E8C5-AF0A-4CC2-B338-E8A5203590E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7E3E8C5-AF0A-4CC2-B338-E8A5203590E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7E3E8C5-AF0A-4CC2-B338-E8A5203590E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7E3E8C5-AF0A-4CC2-B338-E8A5203590E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7E3E8C5-AF0A-4CC2-B338-E8A5203590E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

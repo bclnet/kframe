@@ -59,8 +59,6 @@ namespace KFrame
       await _next(context);
     }
 
-
-
     async Task<KFrameTrace> IFrameAsync(HttpRequest req, HttpResponse res, string remaining)
     {
       var trace = new KFrameTrace(KFrameTrace.Type.IFrame);
