@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Contoso.Extensions\Contoso.Extensions.Caching.FileSystem\Contoso.Extensions.Caching.FileStream.csproj" />
+    <ProjectReference Include="..\..\..\Contoso.Extensions\Contoso.Extensions.Caching.DistributedStream\Contoso.Extensions.Caching.MemoryStream.csproj" />
+    <ProjectReference Include="..\..\..\Contoso.Extensions\Contoso.Extensions.Caching.Http\Contoso.Extensions.Caching.Http.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,12 +9,12 @@ namespace KFrame.Tests
   {
     const string CustomKframeUrl = "https://assist.degdigital.com/@frame";
 
-    public KFrameTest() { KFrame<object>.Config.kframeUrl = CustomKframeUrl; }
+    public KFrameTest() { KFrameManager.Config.kframeUrl = CustomKframeUrl; }
 
     [Fact]
     public void Config()
     {
-      var config = KFrame<object>.Config;
+      var config = KFrameManager.Config;
       // should use custom url
       {
         config.kframeUrl.ShouldBe(CustomKframeUrl);
@@ -22,19 +22,18 @@ namespace KFrame.Tests
     }
 
     [Fact]
-    public Task Frame()
+    public void Frame()
     {
       // should get frame
       try
       {
-        var frame = KFrame<object>.GetFrame();
+        var frame = KFrameManager.GetFrame();
         frame.ShouldNotBeNull();
       }
       catch (Exception e)
       {
 
       }
-      return Task.CompletedTask;
     }
   }
 }

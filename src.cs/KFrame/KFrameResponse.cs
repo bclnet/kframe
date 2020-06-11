@@ -7,7 +7,7 @@ namespace KFrame
   /// <summary>
   /// Class _del_.
   /// </summary>
-  public class _del_
+  class _del_
   {
     public object id { get; set; }
     public string t { get; set; }

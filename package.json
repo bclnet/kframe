@@ -1,6 +1,6 @@
 {
-  "name": "kframe",
-  "version": "0.1.0",
+  "name": "kframe2",
+  "version": "1.0.0",
   "description": "kframe",
   "main": "lib/index.js",
   "keywords": [
