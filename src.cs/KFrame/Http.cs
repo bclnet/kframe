@@ -1,11 +1,10 @@
+using Contoso.Extensions.Caching.MemoryStream;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Contoso.Extensions.Caching.MemoryStream;
-using Newtonsoft.Json;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KFrame
 {

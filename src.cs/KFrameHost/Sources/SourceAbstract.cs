@@ -35,10 +35,10 @@ namespace KFrame.Sources
     /// </summary>
     /// <param name="chapter">The chapter.</param>
     /// <param name="sources">The sources.</param>
-    /// <param name="iframe">The kframe.</param>
+    /// <param name="frame">The frame.</param>
     /// <param name="expand">if set to <c>true</c> [expand].</param>
     /// <returns>Task&lt;System.ValueTuple&lt;dynamic, KFrameRepository.Check, System.String&gt;&gt;.</returns>
-    public abstract Task<(dynamic data, KFrameRepository.Check check, string etag)> GetPFrameAsync(string chapter, IEnumerable<IKFrameSource> sources, DateTime iframe, bool expand);
+    public abstract Task<(dynamic data, KFrameRepository.FrameCheck check, string etag)> GetPFrameAsync(string chapter, IEnumerable<IKFrameSource> sources, DateTime frame, bool expand);
 
     /// <summary>
     /// Clears the asynchronous.

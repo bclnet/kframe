@@ -6,13 +6,14 @@ namespace KFrame
 {
   public class KFrameTrace
   {
-    public enum Type { IFrame, PFrame, Clear, Install, Uninstall, Reinstall }
+    public enum TraceMethod { IFrame, PFrame, Clear, Install, Uninstall, Reinstall }
+    public enum TraceAction { None, BuildIFrame, BuildPFrame, CheckPFrame }
 
-    public KFrameTrace(Type method) => Method = method;
+    public KFrameTrace(TraceMethod method) => Method = method;
 
-    public Type Method;
+    public TraceMethod Method;
+    public TraceAction Action;
     public bool AccessDenied;
-    public bool Rebuild;
     public string FromETag;
     public int StatusCode;
     public string ETag;
@@ -44,8 +45,8 @@ namespace KFrame
       }
       switch (Method)
       {
-        case Type.IFrame:
-        case Type.PFrame:
+        case TraceMethod.IFrame:
+        case TraceMethod.PFrame:
           var b = new StringBuilder($"{Method} Returned:\n");
           if (StatusCode != 0)
           {
@@ -55,17 +56,17 @@ namespace KFrame
             return;
           }
           b.AppendLine($"iframes: {string.Join(",", IFrames)}");
-          if (Rebuild) b.AppendLine($"*rebuild*");
+          if (Action != TraceAction.None) b.AppendLine($"*{Action}*");
           if (ETag != null) b.AppendLine($"etag: {ETag}");
           if (MaxAge != null) b.AppendLine($"max-age: {MaxAge}");
           if (Expires != null) b.AppendLine($"expires: {Expires}");
           if (ContentLength != null) b.AppendLine($"size: {ContentSize}");
           log.LogInformation(b.ToString());
           return;
-        case Type.Clear: log.LogInformation($"KFrame Cleared"); return;
-        case Type.Install: log.LogInformation($"KFrame Installed"); return;
-        case Type.Uninstall: log.LogInformation($"KFrame Uninstalled"); return;
-        case Type.Reinstall: log.LogInformation($"KFrame Reinstalled"); return;
+        case TraceMethod.Clear: log.LogInformation($"KFrame Cleared"); return;
+        case TraceMethod.Install: log.LogInformation($"KFrame Installed"); return;
+        case TraceMethod.Uninstall: log.LogInformation($"KFrame Uninstalled"); return;
+        case TraceMethod.Reinstall: log.LogInformation($"KFrame Reinstalled"); return;
         default: log.LogWarning($"{Method}"); return;
       }
     }

@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace KFrame
@@ -61,7 +61,7 @@ namespace KFrame
 
     async Task<KFrameTrace> IFrameAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.IFrame);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.IFrame);
       res.Clear();
       var etag = req.Headers["If-None-Match"];
       if (!string.IsNullOrEmpty(etag) && etag == "\"iframe\"")
@@ -80,7 +80,7 @@ namespace KFrame
       typedHeaders.Expires = trace.Expires = KFrameTiming.IFrameCacheExpires();
       typedHeaders.ETag = new EntityTagHeaderValue("\"iframe\"");
       trace.ETag = "\"iframe\"";
-      var json = JsonConvert.SerializeObject((object)result);
+      var json = JsonSerializer.Serialize(result);
       await res.WriteAsync(json);
       trace.ContentLength = res.ContentLength ?? json.Length;
       return trace;
@@ -88,7 +88,7 @@ namespace KFrame
 
     async Task<KFrameTrace> PFrameAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.PFrame);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.PFrame);
       res.Clear();
       if (string.IsNullOrEmpty(remaining) || remaining[0] != '/')
       {
@@ -117,7 +117,7 @@ namespace KFrame
       //typedHeaders.Expires = DateTime.Today.ToUniversalTime().AddDays(1);
       typedHeaders.ETag = new EntityTagHeaderValue(result.ETag);
       trace.ETag = result.ETag;
-      var json = JsonConvert.SerializeObject(result.Result);
+      var json = JsonSerializer.Serialize(result.Result);
       await res.WriteAsync(json);
       trace.ContentLength = res.ContentLength ?? json.Length;
       return trace;
@@ -125,28 +125,28 @@ namespace KFrame
 
     async Task<KFrameTrace> ClearAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.Clear);
       await res.WriteAsync(await _repository.ClearAsync(remaining, trace));
       return trace;
     }
 
     async Task<KFrameTrace> InstallAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.Clear);
       await res.WriteAsync(await _repository.InstallAsync(remaining, trace));
       return trace;
     }
 
     async Task<KFrameTrace> UninstallAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.Clear);
       await res.WriteAsync(await _repository.UninstallAsync(remaining, trace));
       return trace;
     }
 
     async Task<KFrameTrace> ReinstallAsync(HttpRequest req, HttpResponse res, string remaining)
     {
-      var trace = new KFrameTrace(KFrameTrace.Type.Clear);
+      var trace = new KFrameTrace(KFrameTrace.TraceMethod.Clear);
       await res.WriteAsync(await _repository.ReinstallAsync(remaining, trace));
       return trace;
     }

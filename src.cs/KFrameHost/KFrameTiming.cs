@@ -8,8 +8,8 @@ namespace KFrame
     public static Func<TimeSpan> IFrameCacheMaxAge = () => DateTime.Today.AddDays(1) - DateTime.Now;
     public static Func<DateTimeOffset> IFrameCacheExpires = () => DateTime.Today.ToUniversalTime().AddDays(1);
 
-    public static Func<DateTime> PFrameAbsoluteExpiration = () => DateTime.Now.AddMinutes(1);
-    public static Func<DateTime> PFramePolling = () => DateTime.Now.AddMinutes(1);
+    public static Func<DateTime> PFrameAbsoluteExpiration = () => DateTime.Now.AddHours(1);
+    public static Func<DateTime> PFramePolling = () => DateTime.Now.AddHours(1);
     public static Func<decimal> PFrameSourceExpireInDays = () => 2M;
   }
 }

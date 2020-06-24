@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace KFrame
@@ -70,6 +73,7 @@ namespace KFrame
   /// <seealso cref="KFrame.IKFrameRepository" />
   public class KFrameRepository : IKFrameRepository
   {
+    public readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
     readonly IMemoryCache _cache;
     IKFrameSource[] _sources;
     List<KFrameNode> _nodes;
@@ -98,7 +102,7 @@ namespace KFrame
     #region Cache
 
     /// <summary>
-    /// Class _del_.
+    /// _del_
     /// Implements the <see cref="KFrame.KFrameRepository.IKey" />
     /// </summary>
     /// <seealso cref="KFrame.KFrameRepository.IKey" />
@@ -114,72 +118,98 @@ namespace KFrame
     }, async (tag, values) =>
     {
       var (parent, trace) = ((KFrameRepository, KFrameTrace))tag;
-      trace.Rebuild = true;
+      // build i-frame
+      trace.Action = KFrameTrace.TraceAction.BuildIFrame;
       var results = new List<object>();
       foreach (var node in parent.Nodes)
         results.Add(await node.Source.GetIFrameAsync(node.Chapter, node.FrameSources));
       return results;
     }, "KFrame");
 
-    readonly static MemoryCacheRegistration PFrame = new MemoryCacheRegistration(nameof(PFrame), AddRemovedCallback(new MemoryCacheEntryOptions
+    readonly static MemoryCacheRegistration PFrame = new MemoryCacheRegistration(nameof(PFrame), new MemoryCacheEntryOptions
     {
       AbsoluteExpiration = KFrameTiming.PFrameAbsoluteExpiration(),
-    }), async (tag, values) =>
+    }, async (tag, values) =>
     {
-      var (parent, trace) = ((KFrameRepository, KFrameTrace))tag;
-      trace.Rebuild = true;
-      var iframe = new DateTime((long)values[0]);
+      var frame = new DateTime((long)values[0]);
       var results = new List<object>();
-      var checks = new Queue<Check>();
+      var checks = new List<FrameCheck>();
       var etags = new List<string>();
-      foreach (var node in parent.Nodes)
+      var (parent, trace) = ((KFrameRepository, KFrameTrace))tag;
+      // lock as late as possible; competing with cache build
+      Thread.Sleep(5);
+      await parent.Semaphore.WaitAsync();
+      try
       {
-        var (data, check, etag) = await node.Source.GetPFrameAsync(node.Chapter, node.FrameSources, iframe, true);
-        results.Add(data);
-        checks.Enqueue(check);
-        etags.Add(etag);
+        // double lock test
+        var value = parent._cache.Get(PFrame.GetName(values));
+        if (value != null)
+          return MemoryCacheResult.CacheResult;
+        // build p-frame
+        trace.Action = KFrameTrace.TraceAction.BuildPFrame;
+        foreach (var node in parent.Nodes)
+        {
+          var (data, check, etag) = await node.Source.GetPFrameAsync(node.Chapter, node.FrameSources, frame, true);
+          results.Add(data);
+          checks.Add(check);
+          etags.Add(etag);
+        }
+        return new MemoryCacheResult(results.ToArray())
+        {
+          Tag = checks,
+          ETag = etags.Count != 0 ? $"\"{string.Join(" ", etags)}\"" : null,
+        };
       }
-      return new MemoryCacheResult(results.ToArray())
+      finally { parent.Semaphore.Release(); }
+    }, "KFrame")
+    {
+      PostEvictionCallback = async (key, value, reason, state) =>
       {
-        Tag = checks,
-        ETag = etags.Count != 0 ? $"\"{string.Join(" ", etags)}\"" : null,
-      };
-    }, "KFrame");
+        var (parent, trace) = ((KFrameRepository, KFrameTrace))state;
+        var iframe = (MemoryCacheResult)parent._cache.Get(IFrame.Name);
+        if (iframe == null || !(iframe.Result is List<object> iframeResult) || iframeResult.Count == 0)
+          return;
+        var frame = (long)((dynamic)iframeResult[0]).frame;
+        var pframeKey = PFrame.GetName(frame);
+        if (pframeKey != (string)key)
+          return;
+        // lock as soon as possible; competing with cache build
+        await parent.Semaphore.WaitAsync();
+        try
+        {
+          // double lock test
+          if (parent._cache.Contains((string)key))
+            return;
+          if (!(value is MemoryCacheResult result) || !(result.Tag is List<FrameCheck> checks))
+            return;
+          var i = 0;
+          foreach (var node in parent.Nodes)
+          {
+            var prevCheck = checks[i++];
+            var (data, check, etag) = await node.Source.GetPFrameAsync(node.Chapter, node.FrameSources, prevCheck.Frame, false);
+            if (check != prevCheck)
+              return;
+          }
+          parent._cache.Set(key, value, new MemoryCacheEntryOptions().SetAbsoluteExpiration(KFrameTiming.PFramePolling()));
+        }
+        finally { parent.Semaphore.Release(); }
+      }
+    };
+
 
     /// <summary>
     /// Class Check.
     /// </summary>
-    public class Check
+    public class FrameCheck
     {
-      public DateTime IFrame;
+      public DateTime Frame;
       public int[] Keys;
       public DateTime MaxDate;
 
-      public override bool Equals(object obj) => obj is Check b ? Keys.SequenceEqual(b.Keys) && MaxDate == b.MaxDate : false;
-      public override int GetHashCode() => IFrame.GetHashCode() ^ Keys.GetHashCode() ^ MaxDate.GetHashCode();
-      public static bool operator ==(Check a, Check b) => a.Equals(b);
-      public static bool operator !=(Check a, Check b) => !a.Equals(b);
-    }
-
-    static MemoryCacheEntryOptions AddRemovedCallback(MemoryCacheEntryOptions options)
-    {
-      options.RegisterPostEvictionCallback(async (key, value, reason, state) =>
-      {
-        var (parent, trace) = ((KFrameRepository, KFrameTrace))state;
-        var result = value as MemoryCacheResult;
-        if (parent == null || result == null || result.Tag == null)
-          return;
-        var checks = (Queue<Check>)result.Tag;
-        foreach (var node in parent.Nodes)
-        {
-          var check = checks.Dequeue();
-          var (data2, check2, etag2) = await node.Source.GetPFrameAsync(node.Chapter, node.FrameSources, check.IFrame, false);
-          if (check != check2)
-            return;
-        }
-        parent._cache.Set(key, value, new MemoryCacheEntryOptions().SetAbsoluteExpiration(KFrameTiming.PFramePolling()));
-      }, null);
-      return options;
+      public override bool Equals(object obj) => obj is FrameCheck b && Keys.SequenceEqual(b.Keys) && MaxDate == b.MaxDate;
+      public override int GetHashCode() => Frame.GetHashCode() ^ Keys.GetHashCode() ^ MaxDate.GetHashCode();
+      public static bool operator ==(FrameCheck a, FrameCheck b) => a.Equals(b);
+      public static bool operator !=(FrameCheck a, FrameCheck b) => !a.Equals(b);
     }
 
     readonly static MemoryCacheRegistration MergedFrame = new MemoryCacheRegistration(nameof(MergedFrame), 10, (tag, values) =>

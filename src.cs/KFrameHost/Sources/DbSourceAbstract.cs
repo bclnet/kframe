@@ -113,21 +113,21 @@ namespace KFrame.Sources
     /// </summary>
     /// <param name="chapter">The chapter.</param>
     /// <param name="sources">The sources.</param>
-    /// <param name="iframe">The iframe.</param>
+    /// <param name="frame">The iframe.</param>
     /// <param name="expand">if set to <c>true</c> [expand].</param>
     /// <returns>Task&lt;System.ValueTuple&lt;dynamic, KFrameRepository.Check, System.String&gt;&gt;.</returns>
     /// <exception cref="ArgumentNullException">DbService</exception>
     /// <exception cref="ArgumentNullException">Schema</exception>
-    public override async Task<(dynamic data, KFrameRepository.Check check, string etag)> GetPFrameAsync(string chapter, IEnumerable<IKFrameSource> sources, DateTime iframe, bool expand)
+    public override async Task<(dynamic data, KFrameRepository.FrameCheck check, string etag)> GetPFrameAsync(string chapter, IEnumerable<IKFrameSource> sources, DateTime frame, bool expand)
     {
       if (DbService == null)
         throw new ArgumentNullException(nameof(DbService));
       if (string.IsNullOrEmpty(Schema))
         throw new ArgumentNullException(nameof(Schema));
-      var iframeL = iframe.ToLocalTime();
+      var frameL = frame.ToLocalTime();
       using (var ctx = DbService.GetConnection(ConnectionName))
       {
-        var s = await ctx.QueryMultipleAsync(GetPFrameProcedure(chapter), new { iframe, iframeL, expand }, commandType: CommandType.StoredProcedure);
+        var s = await ctx.QueryMultipleAsync(GetPFrameProcedure(chapter), new { iframe = frame, iframeL = frameL, expand }, commandType: CommandType.StoredProcedure);
         var f = s.Read().Single(); var frameId = (int?)f.FrameId;
         var etag = Convert.ToBase64String(BitConverter.GetBytes(((DateTime)f.Frame).Ticks));
         if (frameId == null)
@@ -148,7 +148,7 @@ namespace KFrame.Sources
             maxDate = date.Value;
           result?.Add(source.Param.key, source.Read(s));
         }
-        return ((dynamic)result, new KFrameRepository.Check { IFrame = iframe, Keys = new[] { frameId.Value, ddel }, MaxDate = maxDate }, etag);
+        return ((dynamic)result, new KFrameRepository.FrameCheck { Frame = frame, Keys = new[] { frameId.Value, ddel }, MaxDate = maxDate }, etag);
       }
     }
 

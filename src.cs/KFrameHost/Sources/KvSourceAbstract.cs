@@ -47,20 +47,20 @@ namespace KFrame.Sources
     /// </summary>
     /// <param name="chapeter">The chapeter.</param>
     /// <param name="sources">The sources.</param>
-    /// <param name="iframe">The kframe.</param>
+    /// <param name="frame">The kframe.</param>
     /// <param name="expand">if set to <c>true</c> [expand].</param>
     /// <returns>Task&lt;System.ValueTuple&lt;dynamic, KFrameRepository.Check, System.String&gt;&gt;.</returns>
     /// <exception cref="ArgumentNullException">KvService</exception>
     /// <exception cref="ArgumentNullException">ConnectionString</exception>
-    public override Task<(dynamic data, KFrameRepository.Check check, string etag)> GetPFrameAsync(string chapeter, IEnumerable<IKFrameSource> sources, DateTime iframe, bool expand)
+    public override Task<(dynamic data, KFrameRepository.FrameCheck check, string etag)> GetPFrameAsync(string chapeter, IEnumerable<IKFrameSource> sources, DateTime frame, bool expand)
     {
       if (KvService == null)
         throw new ArgumentNullException(nameof(KvService));
       if (string.IsNullOrEmpty(ConnectionString))
         throw new ArgumentNullException(nameof(ConnectionString));
-      var kframeL = iframe.ToLocalTime();
+      var frameL = frame.ToLocalTime();
       using (var ctx = KvService.GetConnection(ConnectionString))
-        return Task.FromResult<(dynamic data, KFrameRepository.Check check, string etag)>((null, null, null));
+        return Task.FromResult<(dynamic data, KFrameRepository.FrameCheck check, string etag)>((null, null, null));
     }
 
     /// <summary>
