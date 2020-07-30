@@ -41,16 +41,26 @@ export const getFrame = () => new Promise((resolve, reject) => {
   if (queue.length === 1) {
     lookupFrame().then((f) => {
       document.frame = f;
+      document.frameDate = new Date().getTime();
       // eslint-disable-next-line no-cond-assign
       let x; while ((x = queue.pop()) !== undefined) x[0](f);
     }, (e) => {
       document.frame = null;
+      document.frameDate = undefined;
       // eslint-disable-next-line no-cond-assign
       let x; while ((x = queue.pop()) !== undefined) x[1](e);
     });
   }
 });
 
+export const checkFrame = (frame, expires) => new Promise((resolve, reject) => {
+  if (document.frameDate + expires <= new Date().getTime()) {
+    return resolve(frame);
+  }
+  document.frame = null;
+  getFrame().then((f) => resolve(f), (e) => reject(e));
+});
+
 export default {
-  config, isLoaded, frame, clearFrame, getFrame
+  config, isLoaded, frame, clearFrame, getFrame, checkFrame
 };

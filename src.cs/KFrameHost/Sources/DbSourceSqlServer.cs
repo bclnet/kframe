@@ -103,7 +103,7 @@ CREATE TABLE [{Schema}].[{FormatName(chapter, "FrameKey")}] (
     {(UseVariant ? "[Id] SQL_VARIANT NOT NULL," : @"[Id0] INT NOT NULL DEFAULT(-1),
     [Id1] NVARCHAR(50) NOT NULL DEFAULT(''),
     [Id2] UNIQUEIDENTIFIER NOT NULL DEFAULT('00000000-0000-0000-0000-000000000000'),")}
-    [Param] NCHAR(1) NOT NULL,
+    [Param] NVARCHAR(50) NOT NULL,
     [FrameId] INT NOT NULL,
     CONSTRAINT [PK_{FormatName(chapter, "FrameKey")}] PRIMARY KEY ({(UseVariant ? "[Id]" : "[Id0], [Id1], [Id2]")}, [Param], [FrameId]),
     CONSTRAINT [FK_{FormatName(chapter, "FrameKey")}_FrameId] FOREIGN KEY ([FrameId]) REFERENCES [{Schema}].[{FormatName(chapter, "Frame")}] ([Id]) ON DELETE CASCADE,

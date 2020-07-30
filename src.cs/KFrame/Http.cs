@@ -1,8 +1,7 @@
 using Contoso.Extensions.Caching.MemoryStream;
-using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,13 +16,13 @@ namespace KFrame
   {
     const string TestCacheFile = @"C:\T_\HttpCache.dat";
     readonly HttpClient _client;
-    readonly JsonSerializerSettings _jsonSettings;
+    readonly JsonSerializerOptions _serializerOptions;
     public static string LastErrorContent;
 
-    public Http(HttpClient client, JsonSerializerSettings jsonSettings)
+    public Http(HttpClient client, JsonSerializerOptions serializerOptions)
     {
       _client = client;
-      _jsonSettings = jsonSettings;
+      _serializerOptions = serializerOptions;
     }
 
     public async Task<T> Execute<T>(HttpRequestMessage requestMessage, CancellationToken? cancellationToken = null)
@@ -36,10 +35,8 @@ namespace KFrame
         if (!response.IsSuccessStatusCode)
           LastErrorContent = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
-        streamCache.SaveToFile(TestCacheFile);
-        return response.Content.Headers.ContentType.MediaType == "application/json"
-            ? await Deserialize<T>(response).ConfigureAwait(false)
-            : default;
+        //streamCache.SaveToFile(TestCacheFile);
+        return await DeserializeAsync<T>(response).ConfigureAwait(false);
       }
       catch (Exception e)
       {
@@ -47,7 +44,7 @@ namespace KFrame
       }
     }
 
-    async Task<T> Deserialize<T>(HttpResponseMessage response) =>
-        JsonSerializer.Create(_jsonSettings).Deserialize<T>(new JsonTextReader(new StreamReader(await response.Content.ReadAsStreamAsync().ConfigureAwait(false))));
+    async ValueTask<T> DeserializeAsync<T>(HttpResponseMessage response) =>
+        await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), _serializerOptions);
   }
 }

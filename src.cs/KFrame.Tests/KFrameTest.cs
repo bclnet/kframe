@@ -9,7 +9,7 @@ namespace KFrame.Tests
   {
     const string CustomKframeUrl = "https://assist.degdigital.com/@frame";
 
-    public KFrameTest() { KFrameManager.Config.kframeUrl = CustomKframeUrl; }
+    public KFrameTest() => ((KFrameDefaultConfig)KFrameManager.Config).KframeUrl = CustomKframeUrl;
 
     [Fact]
     public void Config()
@@ -17,7 +17,7 @@ namespace KFrame.Tests
       var config = KFrameManager.Config;
       // should use custom url
       {
-        config.kframeUrl.ShouldBe(CustomKframeUrl);
+        config.KframeUrl.ShouldBe(CustomKframeUrl);
       }
     }
 

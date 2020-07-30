@@ -1,6 +1,6 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KFrame
 {
@@ -18,6 +18,6 @@ namespace KFrame
     public long frame { get; set; }
     public List<_del_> del { get; set; }
     [JsonExtensionData]
-    public JObject Data { get; set; }
+    public Dictionary<string, JsonElement> Data { get; set; }
   }
 }

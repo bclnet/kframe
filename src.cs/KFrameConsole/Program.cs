@@ -7,7 +7,7 @@ namespace KFrameConsole
   {
     const string CustomKframeUrl = "https://assist.degdigital.com/@frame";
 
-    static Program() { KFrameManager.Config.kframeUrl = CustomKframeUrl; }
+    static Program() => ((KFrameDefaultConfig)KFrameManager.Config).KframeUrl = CustomKframeUrl;
 
     static void Main(string[] args)
     {
