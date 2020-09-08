@@ -20,13 +20,6 @@ namespace KFrame
     public static DateTime FrameDate { get; private set; }
     public static void ClearFrame() { Frame = default; }
 
-    class FrameObjectComparer : IEqualityComparer<FrameObject>
-    {
-      public static readonly FrameObjectComparer Default = new FrameObjectComparer();
-      public bool Equals(FrameObject x, FrameObject y) => false;
-      public int GetHashCode(FrameObject obj) => obj.GetHashCode();
-    }
-
     static async Task<IDictionary<string, FrameObject>> LookupFrame(CancellationToken? cancellationToken = null)
     {
       var data = new Dictionary<string, FrameObject>();
