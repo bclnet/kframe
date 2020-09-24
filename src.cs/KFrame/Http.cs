@@ -7,14 +7,24 @@ using System.Threading.Tasks;
 
 namespace KFrame
 {
+  /// <summary>
+  /// IHttp
+  /// </summary>
   public interface IHttp
   {
+    /// <summary>
+    /// Executes the specified request message.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="requestMessage">The request message.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns></returns>
     Task<T> Execute<T>(HttpRequestMessage requestMessage, CancellationToken? cancellationToken = null);
   }
 
   class Http : IHttp
   {
-    const string TestCacheFile = @"C:\T_\HttpCache.dat";
+    //const string TestCacheFile = @"C:\T_\HttpCache.dat";
     readonly HttpClient _client;
     readonly JsonSerializerOptions _serializerOptions;
     public static string LastErrorContent;
@@ -28,7 +38,7 @@ namespace KFrame
     public async Task<T> Execute<T>(HttpRequestMessage requestMessage, CancellationToken? cancellationToken = null)
     {
       var streamCache = (MemoryStreamCache)((HttpCachedClient)_client).Cache;
-      streamCache.LoadFromFile(TestCacheFile);
+      //streamCache.LoadFromFile(TestCacheFile);
       try
       {
         var response = await _client.SendAsync(requestMessage, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);

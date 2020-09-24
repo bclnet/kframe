@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -42,7 +43,8 @@ namespace KFrame
     public async Task InvokeAsync(HttpContext context)
     {
       var req = context.Request; var res = context.Response;
-      if (req.Path.StartsWithSegments(_options.RequestPath, StringComparison.OrdinalIgnoreCase, out var remaining))
+      if ((!string.IsNullOrEmpty(_options.RequestPath) && req.Path.StartsWithSegments(_options.RequestPath, StringComparison.OrdinalIgnoreCase, out var remaining)) ||
+        (!string.IsNullOrEmpty(_options.RequestSPath) && req.Path.StartsWithSegments(_options.RequestSPath, StringComparison.OrdinalIgnoreCase, out remaining)))
       {
         KFrameTrace trace = null;
         if (remaining.StartsWithSegments("/i", StringComparison.OrdinalIgnoreCase, out var remaining2)) trace = await IFrameAsync(req, res, remaining2);
@@ -149,6 +151,28 @@ namespace KFrame
       var trace = new KFrameTrace(KFrameTrace.TraceMethod.Clear);
       await res.WriteAsync(await _repository.ReinstallAsync(remaining, trace));
       return trace;
+    }
+
+    /// <summary>
+    /// Finds the certificate.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="findType">Type of the find.</param>
+    /// <param name="storeName">Name of the store.</param>
+    /// <param name="location">The location.</param>
+    /// <returns></returns>
+    public static X509Certificate FindCertificate(object value, X509FindType findType = X509FindType.FindBySubjectName, string storeName = null, StoreLocation location = StoreLocation.CurrentUser)
+    {
+      if (value == null || (value is string valueAsString && valueAsString.Length == 0))
+        return null;
+      using (var store = new X509Store(storeName ?? "MY", location))
+      {
+        store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+        return store.Certificates.Find(findType, value, false).Cast<X509Certificate2>()
+            .Where(x => x.NotBefore <= DateTime.Now)
+            .OrderBy(x => x.NotAfter)
+            .FirstOrDefault();
+      }
     }
   }
 }

@@ -14,6 +14,13 @@ namespace KFrame
     /// <value>The request path.</value>
     public string RequestPath { get; set; } = "/@frame";
     /// <summary>
+    /// Gets or sets the request s-path.
+    /// </summary>
+    /// <value>
+    /// The request s-path.
+    /// </value>
+    public string RequestSPath { get; set; } = "/@sframe";
+    /// <summary>
     /// Gets or sets the logger.
     /// </summary>
     /// <value>The logger.</value>

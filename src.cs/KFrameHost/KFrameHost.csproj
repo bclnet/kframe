@@ -9,7 +9,7 @@
     <Authors>Contoso</Authors>
     <Product>KFrame</Product>
     <Description>kframe middleware for hosting frames</Description>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

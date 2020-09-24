@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace KFrame
 {
   /// <summary>
-  /// Class _del_.
+  /// _del_
   /// </summary>
   class _del_
   {
