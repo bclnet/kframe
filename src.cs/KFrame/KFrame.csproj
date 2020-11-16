@@ -8,16 +8,13 @@
     <Company>Contoso</Company>
     <Authors>Contoso</Authors>
     <Description>kframe client library</Description>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Contoso.Extensions\Contoso.Extensions.Caching.Http\Contoso.Extensions.Caching.Http.csproj" />
-    <ProjectReference Include="..\..\..\Contoso.Extensions\Contoso.Extensions.Caching.MemoryStream\Contoso.Extensions.Caching.MemoryStream.csproj" />
+    <PackageReference Include="Contoso.Extensions.Caching.Http" Version="1.0.4" />
+    <PackageReference Include="Contoso.Extensions.Caching.MemoryStream" Version="1.0.4" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

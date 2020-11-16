@@ -9,13 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrameHost", "KFrameHost\KF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrame.Tests", "KFrame.Tests\KFrame.Tests.csproj", "{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contoso.Extensions.Caching.MemoryStream", "..\..\Contoso.Extensions\Contoso.Extensions.Caching.MemoryStream\Contoso.Extensions.Caching.MemoryStream.csproj", "{AF7C6B34-E049-4C51-82F3-E35B639029A1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contoso.Extensions.Caching.Abstractions", "..\..\Contoso.Extensions\Contoso.Extensions.Caching.Abstractions\Contoso.Extensions.Caching.Abstractions.csproj", "{121CA709-956E-4D13-9625-FEE571C1284D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KFrameConsole", "KFrameConsole\KFrameConsole.csproj", "{7C76174E-338F-458C-B54C-48AF61E15D72}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contoso.Extensions.Caching.Http", "..\..\Contoso.Extensions\Contoso.Extensions.Caching.Http\Contoso.Extensions.Caching.Http.csproj", "{4805A06A-C707-4679-8EAA-3BC6E7C3669F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KFrameConsole", "KFrameConsole\KFrameConsole.csproj", "{7C76174E-338F-458C-B54C-48AF61E15D72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,22 +29,10 @@ Global
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2C850DC-67DA-46A7-9271-FB9E2F83B0C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF7C6B34-E049-4C51-82F3-E35B639029A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF7C6B34-E049-4C51-82F3-E35B639029A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF7C6B34-E049-4C51-82F3-E35B639029A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF7C6B34-E049-4C51-82F3-E35B639029A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{121CA709-956E-4D13-9625-FEE571C1284D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{121CA709-956E-4D13-9625-FEE571C1284D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{121CA709-956E-4D13-9625-FEE571C1284D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{121CA709-956E-4D13-9625-FEE571C1284D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7C76174E-338F-458C-B54C-48AF61E15D72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7C76174E-338F-458C-B54C-48AF61E15D72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C76174E-338F-458C-B54C-48AF61E15D72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C76174E-338F-458C-B54C-48AF61E15D72}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4805A06A-C707-4679-8EAA-3BC6E7C3669F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4805A06A-C707-4679-8EAA-3BC6E7C3669F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4805A06A-C707-4679-8EAA-3BC6E7C3669F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4805A06A-C707-4679-8EAA-3BC6E7C3669F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

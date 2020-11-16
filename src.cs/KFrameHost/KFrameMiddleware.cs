@@ -174,5 +174,37 @@ namespace KFrame
             .FirstOrDefault();
       }
     }
+
+    /// <summary>
+    /// Compares the certificate.
+    /// </summary>
+    /// <param name="left">The left.</param>
+    /// <param name="right">The right.</param>
+    /// <returns></returns>
+    public static bool CompareCertificate(X509Certificate left, X509Certificate right) =>
+        left.Subject == right.Subject &&
+        left.Issuer == right.Issuer &&
+        (left is X509Certificate2 left2) && (right is X509Certificate2 right2) &&
+        left2.Thumbprint == right2.Thumbprint;
+
+    /// <summary>
+    /// Verifies the certificate.
+    /// </summary>
+    /// <param name="caCertificate">The ca certificate.</param>
+    /// <param name="certificate">The certificate.</param>
+    /// <returns></returns>
+    public static bool VerifyCertificate(X509Certificate2 caCertificate, X509Certificate2 certificate)
+    {
+      var trustedChain = new X509Chain();
+      trustedChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+      trustedChain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority | X509VerificationFlags.IgnoreNotTimeValid; //X509VerificationFlags.NoFlag;
+      trustedChain.ChainPolicy.ExtraStore.Add(caCertificate);
+      if (!trustedChain.Build(certificate))
+        return false;
+      var valid = trustedChain.ChainElements
+          .Cast<X509ChainElement>()
+          .Any(x => x.Certificate.Thumbprint == caCertificate.Thumbprint);
+      return valid;
+    }
   }
 }

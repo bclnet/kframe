@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
@@ -48,18 +47,22 @@ namespace KFrame
     /// <value>
     /// The frame date.
     /// </value>
-    public static DateTime FrameDate { get; private set; }
+    public static DateTime? FrameDate { get; private set; }
     /// <summary>
     /// Clears the frame.
     /// </summary>
-    public static void ClearFrame() { Frame = default; }
+    public static void ClearFrame()
+    {
+      FrameDate = null;
+      Frame = default;
+    }
 
     static async Task<IDictionary<string, FrameObject>> LookupFrame(CancellationToken? cancellationToken = null)
     {
       var data = new Dictionary<string, FrameObject>();
       var kframeUrl = Config.KframeUrl;
       var certificate = Config.Certificate;
-      
+
       var http = certificate == null ? _defaultHttp : _http.GetOrAdd(certificate, cert =>
       {
         var handler = new HttpClientHandler();
@@ -136,7 +139,7 @@ namespace KFrame
     /// <returns></returns>
     public static IDictionary<string, FrameObject> CheckFrame(IDictionary<string, FrameObject> frame, TimeSpan expires)
     {
-      if (FrameDate + expires <= DateTime.UtcNow)
+      if (FrameDate + expires >= DateTime.UtcNow)
         return Frame;
       Frame = default;
       return GetFrame();

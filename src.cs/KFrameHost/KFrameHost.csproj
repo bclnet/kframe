@@ -9,18 +9,18 @@
     <Authors>Contoso</Authors>
     <Product>KFrame</Product>
     <Description>kframe middleware for hosting frames</Description>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Contoso.Extensions.Caching" Version="1.0.4" />
-    <PackageReference Include="Contoso.Extensions.Data" Version="1.0.5" />
+    <PackageReference Include="Contoso.Extensions.Caching" Version="1.0.5" />
+    <PackageReference Include="Contoso.Extensions.Data" Version="1.0.9" />
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
